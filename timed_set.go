@@ -21,9 +21,14 @@ func NewTimedSet() *TimedSet {
 	}
 }
 
-// Add adds an element in the set.
+// Add adds an element in the set if one of the following condition is met:
+// - Given element does not exists yet
+// - Given element already exists but with a lesser timestamp than the given one
 func (s *TimedSet) Add(value interface{}, t time.Time) {
-	s.elements[value] = t
+	addedAt, ok := s.AddedAt(value)
+	if !ok || (ok && t.After(addedAt)) {
+		s.elements[value] = t
+	}
 }
 
 // AddedAt returns the timestamp of a given element if it exists.

@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const shortDateForm = "2006-Jan-02"
+
 func TestTimedSetNew(t *testing.T) {
 	s := NewTimedSet()
 	assert.Equal(t, 0, len(s.elements))
@@ -28,4 +30,32 @@ func TestTimedSetAddedAt(t *testing.T) {
 	addedAt, ok := s.AddedAt("Hello world!")
 	assert.Equal(t, true, ok)
 	assert.Equal(t, now, addedAt)
+}
+
+func TestTimedSetAddSameElementWithGreaterTimestamp(t *testing.T) {
+	oct24, _ := time.Parse(shortDateForm, "2016-Oct-24")
+	oct25, _ := time.Parse(shortDateForm, "2016-Oct-25")
+
+	s := NewTimedSet()
+	s.Add("Hi!", oct24)
+	addedAt, _ := s.AddedAt("Hi!")
+	assert.Equal(t, oct24, addedAt)
+
+	s.Add("Hi!", oct25)
+	addedAt, _ = s.AddedAt("Hi!")
+	assert.Equal(t, oct25, addedAt)
+}
+
+func TestTimedSetAddSameElementWithLesserTimestamp(t *testing.T) {
+	oct23, _ := time.Parse(shortDateForm, "2016-Oct-23")
+	oct24, _ := time.Parse(shortDateForm, "2016-Oct-24")
+
+	s := NewTimedSet()
+	s.Add("Hi!", oct24)
+	addedAt, _ := s.AddedAt("Hi!")
+	assert.Equal(t, oct24, addedAt)
+
+	s.Add("Hi!", oct23)
+	addedAt, _ = s.AddedAt("Hi!")
+	assert.Equal(t, oct24, addedAt)
 }
