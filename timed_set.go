@@ -20,3 +20,8 @@ func NewTimedSet() *TimedSet {
 		elements: make(map[interface{}]time.Time),
 	}
 }
+
+// Add adds an element in the set.
+func (s *TimedSet) Add(value interface{}, t time.Time) {
+	s.elements[value] = t
+}
