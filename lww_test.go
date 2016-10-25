@@ -33,3 +33,18 @@ func TestLWWExists(t *testing.T) {
 	set.Remove("Hello", time.Now())
 	assert.Equal(t, false, set.Exists("Hello"))
 }
+
+func TestLWWGest(t *testing.T) {
+	set := NewElementSet()
+	set.Add("Montreal", time.Now())
+	set.Add("NYC", time.Now())
+	set.Add("Toronto", time.Now())
+	set.Add("Paris", time.Now())
+	set.Remove("Montreal", time.Now())
+	result := set.Get()
+	assert.Equal(t, 3, len(result))
+	assert.Contains(t, result, "NYC")
+	assert.Contains(t, result, "Toronto")
+	assert.Contains(t, result, "Paris")
+	assert.NotContains(t, result, "Montreal")
+}

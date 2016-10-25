@@ -35,10 +35,30 @@ func (s ElementSet) Exists(value interface{}) bool {
 	if !added {
 		return false
 	}
-
-	removedAt, removed := s.removals.AddedAt(value)
-	if !removed || (removed && addedAt.After(removedAt)) {
+	if !s.isRemoved(value, addedAt) {
 		return true
 	}
 	return false
+}
+
+func (s ElementSet) isRemoved(value interface{}, since time.Time) bool {
+	removedAt, removed := s.removals.AddedAt(value)
+	if !removed {
+		return false
+	}
+	if since.Before(removedAt) {
+		return true
+	}
+	return false
+}
+
+// Get returns set content
+func (s ElementSet) Get() []interface{} {
+	var result []interface{}
+	s.additions.Each(func(element interface{}, addedAt time.Time) {
+		if !s.isRemoved(element, addedAt) {
+			result = append(result, element)
+		}
+	})
+	return result
 }

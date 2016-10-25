@@ -52,3 +52,13 @@ func (s *TimedSet) AddedAt(value interface{}) (time.Time, bool) {
 	t, ok := s.elements[value]
 	return t, ok
 }
+
+// Each traverses the items in the TimedSet, calling the provided function
+// for each element/timestamp association.
+func (s *TimedSet) Each(f func(element interface{}, addedAt time.Time)) {
+	s.l.RLock()
+	defer s.l.RUnlock()
+	for element, addedAt := range s.elements {
+		f(element, addedAt)
+	}
+}
