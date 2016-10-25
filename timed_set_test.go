@@ -17,3 +17,15 @@ func TestTimedSetAdd(t *testing.T) {
 	s.Add("Hi!", time.Now())
 	assert.Equal(t, 1, len(s.elements))
 }
+
+func TestTimedSetAddedAt(t *testing.T) {
+	s := NewTimedSet()
+	_, ok := s.AddedAt("Nothing")
+	assert.Equal(t, false, ok)
+
+	now := time.Now()
+	s.Add("Hello world!", now)
+	addedAt, ok := s.AddedAt("Hello world!")
+	assert.Equal(t, true, ok)
+	assert.Equal(t, now, addedAt)
+}

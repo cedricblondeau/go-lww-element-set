@@ -25,3 +25,12 @@ func NewTimedSet() *TimedSet {
 func (s *TimedSet) Add(value interface{}, t time.Time) {
 	s.elements[value] = t
 }
+
+// AddedAt returns the timestamp of a given element if it exists.
+//
+// The second return value (bool) indicates whether the element exists or not.
+// If the given element does not exists, the second return (bool) is false.
+func (s *TimedSet) AddedAt(value interface{}) (time.Time, bool) {
+	t, ok := s.elements[value]
+	return t, ok
+}
