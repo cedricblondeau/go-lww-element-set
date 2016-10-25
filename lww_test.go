@@ -24,3 +24,12 @@ func TestLWWRemove(t *testing.T) {
 	set.Remove("Hello", time.Now())
 	assert.Equal(t, 1, len(set.removals.elements))
 }
+
+func TestLWWExists(t *testing.T) {
+	set := NewElementSet()
+	assert.Equal(t, false, set.Exists("Hello"))
+	set.Add("Hello", time.Now())
+	assert.Equal(t, true, set.Exists("Hello"))
+	set.Remove("Hello", time.Now())
+	assert.Equal(t, false, set.Exists("Hello"))
+}

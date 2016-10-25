@@ -28,3 +28,17 @@ func (s *ElementSet) Add(value interface{}, t time.Time) {
 func (s *ElementSet) Remove(value interface{}, t time.Time) {
 	s.removals.Add(value, t)
 }
+
+// Exists checks if an element is marked as present in the set
+func (s ElementSet) Exists(value interface{}) bool {
+	addedAt, added := s.additions.AddedAt(value)
+	if !added {
+		return false
+	}
+
+	removedAt, removed := s.removals.AddedAt(value)
+	if !removed || (removed && addedAt.After(removedAt)) {
+		return true
+	}
+	return false
+}
