@@ -34,7 +34,7 @@ func NewTimedSet() *TimedSet {
 func (s *TimedSet) Add(value interface{}, t time.Time) {
 	s.l.Lock()
 	defer s.l.Unlock()
-	addedAt, ok := s.AddedAt(value)
+	addedAt, ok := s.elements[value]
 	if !ok || (ok && t.After(addedAt)) {
 		s.elements[value] = t
 	}
@@ -44,7 +44,11 @@ func (s *TimedSet) Add(value interface{}, t time.Time) {
 //
 // The second return value (bool) indicates whether the element exists or not.
 // If the given element does not exists, the second return (bool) is false.
+//
+// This function is thread-safe.
 func (s *TimedSet) AddedAt(value interface{}) (time.Time, bool) {
+	s.l.RLock()
+	defer s.l.RUnlock()
 	t, ok := s.elements[value]
 	return t, ok
 }
