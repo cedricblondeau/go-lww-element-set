@@ -20,6 +20,21 @@ A [TimedSet](timed_set.go) is backed with a [Go map](https://blog.golang.org/go-
 Because Go maps are [not safe for concurrent use](https://golang.org/doc/faq#atomic_maps), 
 mutual exclusion is used.
 
+## Usage
+
+```go
+import (
+	"time"
+	"github.com/cedricblondeau/go-lww-element-set"
+)
+
+lww := lww.NewElementSet()
+lww.Add("Hello", time.Now())
+lww.Add("Hi!", time.Now())
+lww.Remove("Hello", time.Now())
+elements := lww.Get() // ["Hi!"]
+```
+
 ## Run tests
 
 To run tests with race detector enabled:
