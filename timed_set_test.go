@@ -1,6 +1,7 @@
 package lww
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -57,5 +58,26 @@ func TestTimedSetAddSameElementWithLesserTimestamp(t *testing.T) {
 
 	s.Add("Hi!", oct23)
 	addedAt, _ = s.AddedAt("Hi!")
+	assert.Equal(t, oct24, addedAt)
+}
+
+func TestTimedSetConcurrentAdd(t *testing.T) {
+	oct23, _ := time.Parse(shortDateForm, "2016-Oct-23")
+	oct24, _ := time.Parse(shortDateForm, "2016-Oct-24")
+	s := NewTimedSet()
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		s.Add("Hi!", oct24)
+	}()
+	go func() {
+		defer wg.Done()
+		s.Add("Hi!", oct23)
+	}()
+	wg.Wait()
+
+	addedAt, ok := s.AddedAt("Hi!")
+	assert.Equal(t, true, ok)
 	assert.Equal(t, oct24, addedAt)
 }
