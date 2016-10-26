@@ -1,8 +1,18 @@
-hash: 2955a78f3d4a0de3d71aef69c79d126dea9efc230b8ccd8613d85de71eee9558
-updated: 2016-10-25T13:05:17.828007724-04:00
+hash: f8d95b4ed6d4f60ed37222046a1d1321ba33d1dc12c3e89ab198898827c1dbf1
+updated: 2016-10-25T20:08:57.301280396-04:00
 imports:
+- name: github.com/go-redis/redis
+  version: 80cf5d1652d5590c35edc6c2dc1aa354790e3010
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
-testImports: []
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
