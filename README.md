@@ -16,7 +16,10 @@ data structure that uses timestamped adds and removes.
 This implementation ([ElementSet](lww.go)) uses 
 two separate underlying timestamped sets ([TimedSet](timed_set.go)).
 
-A [TimedSet](timed_set.go) is backed with a [Go map](https://blog.golang.org/go-maps-in-action).
+### TimedSetMap (using Go maps)
+
+A [TimedSetMap](timed_set_map.go) is a [TimedSet](timed_set.go) backed 
+with a [Go map](https://blog.golang.org/go-maps-in-action).
 Because Go maps are [not safe for concurrent use](https://golang.org/doc/faq#atomic_maps), 
 mutual exclusion is used.
 
