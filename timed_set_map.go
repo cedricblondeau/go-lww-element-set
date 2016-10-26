@@ -5,16 +5,16 @@ import (
 	"time"
 )
 
-// TimedSetMap is a TimedSet implementation that uses a map data structure.
+// MapTimedSet is a TimedSet implementation that uses a map data structure.
 // Maps in Go are not thread safe by default and that's why we use mutual exclusion.
-type TimedSetMap struct {
+type MapTimedSet struct {
 	elements map[interface{}]time.Time
 	l        sync.RWMutex // we name it because we don't want to expose it
 }
 
-// NewTimedSetMap returns an empty and ready-to-use map-backed TimedSet data structure.
-func NewTimedSetMap() *TimedSetMap {
-	return &TimedSetMap{
+// NewMapTimedSet returns an empty and ready-to-use map-backed TimedSet data structure.
+func NewMapTimedSet() *MapTimedSet {
+	return &MapTimedSet{
 		elements: make(map[interface{}]time.Time),
 	}
 }
@@ -24,7 +24,7 @@ func NewTimedSetMap() *TimedSetMap {
 // - Given element already exists but with a lesser timestamp than the given one
 //
 // This function is thread-safe.
-func (s *TimedSetMap) Add(value interface{}, t time.Time) {
+func (s *MapTimedSet) Add(value interface{}, t time.Time) {
 	s.l.Lock()
 	defer s.l.Unlock()
 	addedAt, ok := s.elements[value]
@@ -39,7 +39,7 @@ func (s *TimedSetMap) Add(value interface{}, t time.Time) {
 // If the given element does not exists, the second return (bool) is false.
 //
 // This function is thread-safe.
-func (s *TimedSetMap) AddedAt(value interface{}) (time.Time, bool) {
+func (s *MapTimedSet) AddedAt(value interface{}) (time.Time, bool) {
 	s.l.RLock()
 	defer s.l.RUnlock()
 	t, ok := s.elements[value]
@@ -48,10 +48,11 @@ func (s *TimedSetMap) AddedAt(value interface{}) (time.Time, bool) {
 
 // Each traverses the items in the TimedSet, calling the provided function
 // for each element/timestamp association.
-func (s *TimedSetMap) Each(f func(element interface{}, addedAt time.Time)) {
+func (s *MapTimedSet) Each(f func(element interface{}, addedAt time.Time)) error {
 	s.l.RLock()
 	defer s.l.RUnlock()
 	for element, addedAt := range s.elements {
 		f(element, addedAt)
 	}
+	return nil
 }

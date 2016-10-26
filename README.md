@@ -11,19 +11,26 @@ across a set of nodes in a distributed system.
 This package focuses on Last-Writer-Wins (LWW) Element Set 
 data structure that uses timestamped adds and removes.
 
-## Implementation
+## Implementations
 
-This implementation ([ElementSet](lww.go)) uses 
-two separate underlying timestamped sets ([TimedSet](timed_set.go)).
+[ElementSet](lww.go) defines the LWW Element Set logic.
+An [ElementSet](lww.go) is backed by two underlying 
+timestamped sets ([TimedSet](timed_set.go)).
 
-### TimedSetMap (using Go maps)
+[TimedSet](timed_set.go) is an interface that defines 
+a set where added element are associated with timestamps.
+This package provides two implementations of this interface:
+- MapTimedSet (using Go maps)
+- RedisTimedSet (using Redis)
 
-A [TimedSetMap](timed_set_map.go) is a [TimedSet](timed_set.go) backed 
+#### Map-backed implementation
+
+`NewMapElementSet()` returns a LWW backed with two [MapTimedSet](timed_set_map.go).
+
+A [MapTimedSet](timed_set_map.go) is a [TimedSet](timed_set.go) backed 
 with a [Go map](https://blog.golang.org/go-maps-in-action).
 Because Go maps are [not safe for concurrent use](https://golang.org/doc/faq#atomic_maps), 
 mutual exclusion is used.
-
-## Usage
 
 ```go
 import (
@@ -31,11 +38,40 @@ import (
 	"github.com/cedricblondeau/go-lww-element-set"
 )
 
-lww := lww.NewElementSet()
-lww.Add("Hello", time.Now())
-lww.Add("Hi!", time.Now())
-lww.Remove("Hello", time.Now())
-elements := lww.Get() // ["Hi!"]
+ms := lww.NewMapElementSet()
+ms.Add("Hello", time.Now())
+ms.Add("Hi!", time.Now())
+ms.Remove("Hello", time.Now())
+ms.Get() // ["Hi!"]
+```
+
+#### Redis-backed implementation
+
+`NewRedisElementSet()` returns a LWW backed with two [RedisTimedSet](timed_set_redis.go).
+
+A [RedisTimedSet](timed_set_redis.go) is a [TimedSet](timed_set.go) backed 
+with a [Redis sorted set](http://redis.io/topics/data-types#sorted-sets).
+This implementation uses a Redis script ([which is transactional by definition and by extension atomic](http://redis.io/topics/transactions#redis-scripting-and-transactions)) 
+to add elements.
+
+```go
+import (
+	"time"
+
+	"github.com/cedricblondeau/go-lww-element-set"
+	redis "gopkg.in/redis.v4"
+)
+
+rc := redis.NewClient(&redis.Options{
+	Addr:     "localhost:6379",
+	Password: "", // no password set
+	DB:       0,  // use default DB
+})
+rs := lww.NewRedisElementSet("shopping_cart", rc)
+rs.Add("Product #1", time.Now())
+rs.Add("Product #2", time.Now())
+rs.Remove("Product #1", time.Now())
+rs.Get() // ["Product #2"]
 ```
 
 ## Run tests

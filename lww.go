@@ -1,7 +1,10 @@
 package lww
 
 import (
+	"strings"
 	"time"
+
+	redis "gopkg.in/redis.v4"
 )
 
 // ElementSet is a Last-Writer-Wins (LWW) Element Set data structure
@@ -11,11 +14,42 @@ type ElementSet struct {
 	removals  TimedSet
 }
 
-// NewElementSet returns an empty and ready-to-use LWW element set
-func NewElementSet() *ElementSet {
+// NewMapElementSet returns an empty and ready-to-use map-backed LWW element set
+func NewMapElementSet() *ElementSet {
 	return &ElementSet{
-		additions: NewTimedSetMap(),
-		removals:  NewTimedSetMap(),
+		additions: NewMapTimedSet(),
+		removals:  NewMapTimedSet(),
+	}
+}
+
+// NewRedisElementSet returns an empty and ready-to-use redis-backed LWW element set
+func NewRedisElementSet(prefixKey string, c *redis.Client) *ElementSet {
+	return &ElementSet{
+		additions: NewRedisTimedSet(strings.Join([]string{prefixKey, "_lww_additions"}, ""), c),
+		removals:  NewRedisTimedSet(strings.Join([]string{prefixKey, "_lww_removals"}, ""), c),
+	}
+}
+
+// NewRedisElementSetWithCustomMarshalling returns an empty
+// and ready-to-use redis-backed LWW element set with
+// custom marshalling and unmarshalling functions
+func NewRedisElementSetWithCustomMarshalling(
+	prefixKey string,
+	c *redis.Client,
+	marshal func(value interface{}) string,
+	unmarshal func(value string) interface{}) *ElementSet {
+
+	additions := NewRedisTimedSet(strings.Join([]string{prefixKey, "_lww_additions"}, ""), c)
+	additions.marshal = marshal
+	additions.unmarshal = unmarshal
+
+	removals := NewRedisTimedSet(strings.Join([]string{prefixKey, "_lww_removals"}, ""), c)
+	removals.marshal = marshal
+	removals.unmarshal = unmarshal
+
+	return &ElementSet{
+		additions: additions,
+		removals:  removals,
 	}
 }
 

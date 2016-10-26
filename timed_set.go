@@ -11,5 +11,5 @@ import "time"
 type TimedSet interface {
 	Add(interface{}, time.Time)
 	AddedAt(interface{}) (time.Time, bool)
-	Each(func(interface{}, time.Time))
+	Each(func(interface{}, time.Time)) error
 }
