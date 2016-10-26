@@ -9,23 +9,10 @@ import (
 
 func TestLWWNew(t *testing.T) {
 	set := NewElementSet()
-	assert.Equal(t, 0, len(set.additions.elements))
-	assert.Equal(t, 0, len(set.removals.elements))
+	assert.Equal(t, 0, len(set.Get()))
 }
 
-func TestLWWAdd(t *testing.T) {
-	set := NewElementSet()
-	set.Add("Hello", time.Now())
-	assert.Equal(t, 1, len(set.additions.elements))
-}
-
-func TestLWWRemove(t *testing.T) {
-	set := NewElementSet()
-	set.Remove("Hello", time.Now())
-	assert.Equal(t, 1, len(set.removals.elements))
-}
-
-func TestLWWExists(t *testing.T) {
+func TestLWWAddRemoveAndExists(t *testing.T) {
 	set := NewElementSet()
 	assert.Equal(t, false, set.Exists("Hello"))
 	set.Add("Hello", time.Now())
@@ -34,7 +21,7 @@ func TestLWWExists(t *testing.T) {
 	assert.Equal(t, false, set.Exists("Hello"))
 }
 
-func TestLWWGest(t *testing.T) {
+func TestLWWAddRemoveAndGet(t *testing.T) {
 	set := NewElementSet()
 	set.Add("Montreal", time.Now())
 	set.Add("NYC", time.Now())

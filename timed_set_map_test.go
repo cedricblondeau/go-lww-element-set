@@ -10,19 +10,19 @@ import (
 
 const shortDateForm = "2006-Jan-02"
 
-func TestTimedSetNew(t *testing.T) {
-	s := NewTimedSet()
+func TestTimedSetMapNew(t *testing.T) {
+	s := NewTimedSetMap()
 	assert.Equal(t, 0, len(s.elements))
 }
 
-func TestTimedSetAdd(t *testing.T) {
-	s := NewTimedSet()
+func TestTimedSetMapAdd(t *testing.T) {
+	s := NewTimedSetMap()
 	s.Add("Hi!", time.Now())
 	assert.Equal(t, 1, len(s.elements))
 }
 
-func TestTimedSetAddedAt(t *testing.T) {
-	s := NewTimedSet()
+func TestTimedSetMapAddedAt(t *testing.T) {
+	s := NewTimedSetMap()
 	_, ok := s.AddedAt("Nothing")
 	assert.Equal(t, false, ok)
 
@@ -37,7 +37,7 @@ func TestTimedSetAddSameElementWithGreaterTimestamp(t *testing.T) {
 	oct24, _ := time.Parse(shortDateForm, "2016-Oct-24")
 	oct25, _ := time.Parse(shortDateForm, "2016-Oct-25")
 
-	s := NewTimedSet()
+	s := NewTimedSetMap()
 	s.Add("Hi!", oct24)
 	addedAt, _ := s.AddedAt("Hi!")
 	assert.Equal(t, oct24, addedAt)
@@ -51,7 +51,7 @@ func TestTimedSetAddSameElementWithLesserTimestamp(t *testing.T) {
 	oct23, _ := time.Parse(shortDateForm, "2016-Oct-23")
 	oct24, _ := time.Parse(shortDateForm, "2016-Oct-24")
 
-	s := NewTimedSet()
+	s := NewTimedSetMap()
 	s.Add("Hi!", oct24)
 	addedAt, _ := s.AddedAt("Hi!")
 	assert.Equal(t, oct24, addedAt)
@@ -64,7 +64,7 @@ func TestTimedSetAddSameElementWithLesserTimestamp(t *testing.T) {
 func TestTimedSetConcurrentAdd(t *testing.T) {
 	oct23, _ := time.Parse(shortDateForm, "2016-Oct-23")
 	oct24, _ := time.Parse(shortDateForm, "2016-Oct-24")
-	s := NewTimedSet()
+	s := NewTimedSetMap()
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
