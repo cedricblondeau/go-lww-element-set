@@ -8,8 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const shortDateForm = "2006-Jan-02"
-
 func TestTimedSetMapNew(t *testing.T) {
 	s := NewMapTimedSet()
 	assert.Equal(t, 0, len(s.elements))

@@ -8,9 +8,6 @@ import (
 	redis "gopkg.in/redis.v4"
 )
 
-const redisTestingKey = "timed_set_testing"
-const msDateForm = "2006-Jan-02 15:04:05.000"
-
 func testingRedisClient(t *testing.T) *redis.Client {
 	c := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -31,13 +28,13 @@ func testingRedisTimedSet(t *testing.T) *RedisTimedSet {
 }
 
 func TestTimeToFloat(t *testing.T) {
-	time, _ := time.Parse(msDateForm, "2016-Dec-24 23:59:59.998")
+	time, _ := time.Parse(millisecondDateForm, "2016-Dec-24 23:59:59.998")
 	f := timeToFloat(time)
 	assert.Equal(t, 1.482623999998e+15, f)
 }
 
 func TestFloatToTime(t *testing.T) {
-	expected, _ := time.Parse(msDateForm, "2016-Dec-24 23:59:59.998")
+	expected, _ := time.Parse(millisecondDateForm, "2016-Dec-24 23:59:59.998")
 	f := 1.482623999998e+15
 	time := floatToTime(f).UTC()
 	assert.Equal(t, expected, time)
