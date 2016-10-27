@@ -9,7 +9,7 @@ import "time"
 // It's useful as an underlying data structure for
 // building a Last-Writer-Wins (LWW) element set.
 type timedSet interface {
-	add(interface{}, time.Time)
-	addedAt(interface{}) (time.Time, bool)
-	each(func(interface{}, time.Time)) error
+	add(interface{}, time.Time) error
+	addedAt(interface{}) (time.Time, bool, error)
+	each(func(interface{}, time.Time) error) error
 }

@@ -21,13 +21,15 @@ func TestTimedSetMapAdd(t *testing.T) {
 
 func TestTimedSetMapAddedAt(t *testing.T) {
 	s := newMapTimedSet()
-	_, ok := s.addedAt("Nothing")
-	assert.Equal(t, false, ok)
+	_, found, err := s.addedAt("Nothing")
+	assert.Nil(t, err)
+	assert.Equal(t, false, found)
 
 	now := time.Now()
 	s.add("Hello world!", now)
-	addedAt, ok := s.addedAt("Hello world!")
-	assert.Equal(t, true, ok)
+	addedAt, found, err := s.addedAt("Hello world!")
+	assert.Nil(t, err)
+	assert.Equal(t, true, found)
 	assert.Equal(t, now, addedAt)
 }
 
@@ -37,11 +39,15 @@ func TestTimedSetMapAddSameElementWithGreaterTimestamp(t *testing.T) {
 
 	s := newMapTimedSet()
 	s.add("Hi!", oct24)
-	addedAt, _ := s.addedAt("Hi!")
+	addedAt, found, err := s.addedAt("Hi!")
+	assert.Equal(t, true, found)
+	assert.Nil(t, err)
 	assert.Equal(t, oct24, addedAt)
 
 	s.add("Hi!", oct25)
-	addedAt, _ = s.addedAt("Hi!")
+	addedAt, found, err = s.addedAt("Hi!")
+	assert.Equal(t, true, found)
+	assert.Nil(t, err)
 	assert.Equal(t, oct25, addedAt)
 }
 
@@ -51,11 +57,15 @@ func TestTimedSetMapAddSameElementWithLesserTimestamp(t *testing.T) {
 
 	s := newMapTimedSet()
 	s.add("Hi!", oct24)
-	addedAt, _ := s.addedAt("Hi!")
+	addedAt, found, err := s.addedAt("Hi!")
+	assert.Nil(t, err)
+	assert.Equal(t, true, found)
 	assert.Equal(t, oct24, addedAt)
 
 	s.add("Hi!", oct23)
-	addedAt, _ = s.addedAt("Hi!")
+	addedAt, found, err = s.addedAt("Hi!")
+	assert.Nil(t, err)
+	assert.Equal(t, true, found)
 	assert.Equal(t, oct24, addedAt)
 }
 
@@ -75,7 +85,8 @@ func TestTimedSetConcurrentAdd(t *testing.T) {
 	}()
 	wg.Wait()
 
-	addedAt, ok := s.addedAt("Hi!")
-	assert.Equal(t, true, ok)
+	addedAt, found, err := s.addedAt("Hi!")
+	assert.Nil(t, err)
+	assert.Equal(t, true, found)
 	assert.Equal(t, oct24, addedAt)
 }

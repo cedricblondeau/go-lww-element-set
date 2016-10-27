@@ -42,7 +42,8 @@ func TestFloatToTime(t *testing.T) {
 
 func TestTimedSetRedisAdd(t *testing.T) {
 	s := testingRedisTimedSet(t)
-	s.add("Raptors", time.Now())
+	err := s.add("Raptors", time.Now())
+	assert.Nil(t, err)
 	res := s.client.ZCard(redisTestingKey)
 	assert.Equal(t, int64(1), res.Val())
 }
@@ -50,8 +51,10 @@ func TestTimedSetRedisAdd(t *testing.T) {
 func TestTimedSetRedisAddedAt(t *testing.T) {
 	s := testingRedisTimedSet(t)
 	now := time.Now()
-	s.add("Giants", now)
-	addedAt, ok := s.addedAt("Giants")
+	addErr := s.add("Giants", now)
+	assert.Nil(t, addErr)
+	addedAt, ok, err := s.addedAt("Giants")
+	assert.Nil(t, err)
 	assert.Equal(t, true, ok)
 	expected := floatToTime(timeToFloat(now))
 	assert.Equal(t, expected, addedAt)
@@ -64,10 +67,11 @@ func TestTimedSetRedisEach(t *testing.T) {
 	s.add("Dog", time.Now())
 
 	result := []string{}
-	err := s.each(func(element interface{}, addedAt time.Time) {
+	err := s.each(func(element interface{}, addedAt time.Time) error {
 		result = append(result, element.(string))
+		return nil
 	})
-	assert.Equal(t, nil, err)
+	assert.Nil(t, err)
 	assert.Equal(t, []string{"Koala", "Cat", "Dog"}, result)
 }
 
@@ -77,11 +81,15 @@ func TestTimedSetMapRedisSameElementWithGreaterTimestamp(t *testing.T) {
 
 	s := testingRedisTimedSet(t)
 	s.add("Hi!", oct24)
-	addedAt, _ := s.addedAt("Hi!")
+	addedAt, found, err := s.addedAt("Hi!")
+	assert.True(t, found)
+	assert.Nil(t, err)
 	assert.Equal(t, floatToTime(timeToFloat(oct24)), addedAt)
 
 	s.add("Hi!", oct25)
-	addedAt, _ = s.addedAt("Hi!")
+	addedAt, found, err = s.addedAt("Hi!")
+	assert.True(t, found)
+	assert.Nil(t, err)
 	assert.Equal(t, floatToTime(timeToFloat(oct25)), addedAt)
 }
 
@@ -91,10 +99,14 @@ func TestTimedSetMapRedisSameElementWithLesserTimestamp(t *testing.T) {
 
 	s := testingRedisTimedSet(t)
 	s.add("Hi!", oct24)
-	addedAt, _ := s.addedAt("Hi!")
+	addedAt, found, err := s.addedAt("Hi!")
+	assert.Nil(t, err)
+	assert.True(t, found)
 	assert.Equal(t, floatToTime(timeToFloat(oct24)), addedAt)
 
 	s.add("Hi!", oct23)
-	addedAt, _ = s.addedAt("Hi!")
+	addedAt, found, err = s.addedAt("Hi!")
+	assert.Nil(t, err)
+	assert.True(t, found)
 	assert.Equal(t, floatToTime(timeToFloat(oct24)), addedAt)
 }

@@ -24,13 +24,14 @@ func newMapTimedSet() *mapTimedSet {
 // - Given element already exists but with a lesser timestamp than the given one
 //
 // This function is thread-safe.
-func (s *mapTimedSet) add(value interface{}, t time.Time) {
+func (s *mapTimedSet) add(value interface{}, t time.Time) error {
 	s.l.Lock()
 	defer s.l.Unlock()
 	addedAt, ok := s.elements[value]
 	if !ok || (ok && t.After(addedAt)) {
 		s.elements[value] = t
 	}
+	return nil
 }
 
 // addedAt returns the timestamp of a given element if it exists.
@@ -39,16 +40,16 @@ func (s *mapTimedSet) add(value interface{}, t time.Time) {
 // If the given element does not exists, the second return (bool) is false.
 //
 // This function is thread-safe.
-func (s *mapTimedSet) addedAt(value interface{}) (time.Time, bool) {
+func (s *mapTimedSet) addedAt(value interface{}) (time.Time, bool, error) {
 	s.l.RLock()
 	defer s.l.RUnlock()
 	t, ok := s.elements[value]
-	return t, ok
+	return t, ok, nil
 }
 
 // each traverses the items in the TimedSet, calling the provided function
 // for each element/timestamp association.
-func (s *mapTimedSet) each(f func(element interface{}, addedAt time.Time)) error {
+func (s *mapTimedSet) each(f func(element interface{}, addedAt time.Time) error) error {
 	s.l.RLock()
 	defer s.l.RUnlock()
 	for element, addedAt := range s.elements {

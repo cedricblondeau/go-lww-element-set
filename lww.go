@@ -53,46 +53,78 @@ func NewRedisElementSetWithCustomMarshalling(
 	}
 }
 
-// Add marks an element to be added at a given timestamp
-func (s *ElementSet) Add(value interface{}, t time.Time) {
-	s.additions.add(value, t)
+// Add marks an element to be added at a given timestamp.
+//
+// Because of eventual consistencty, we do not guarantee
+// that the operation took effect, we just return an error
+// if a network error occured.
+func (s *ElementSet) Add(value interface{}, t time.Time) error {
+	return s.additions.add(value, t)
 }
 
-// Remove marks an element to be removed at a given timestamp
-func (s *ElementSet) Remove(value interface{}, t time.Time) {
-	s.removals.add(value, t)
+// Remove marks an element to be removed at a given timestamp.
+//
+// Because of eventual consistencty, we do not guarantee
+// that the operation took effect, we just return an error
+// if a network error occured.
+func (s *ElementSet) Remove(value interface{}, t time.Time) error {
+	return s.removals.add(value, t)
 }
 
 // Exists checks if an element is marked as present in the set
-func (s ElementSet) Exists(value interface{}) bool {
-	addedAt, added := s.additions.addedAt(value)
+// Please note that this function provides liveness guarantees only.
+func (s ElementSet) Exists(value interface{}) (bool, error) {
+	addedAt, added, addedErr := s.additions.addedAt(value)
+	if addedErr != nil {
+		return false, addedErr
+	}
 	if !added {
-		return false
+		return false, nil
 	}
-	if !s.isRemoved(value, addedAt) {
-		return true
+
+	removed, removedErr := s.isRemoved(value, addedAt)
+	if removedErr != nil {
+		return false, removedErr
 	}
-	return false
+	if !removed {
+		return true, nil
+	}
+	return false, nil
 }
 
-func (s ElementSet) isRemoved(value interface{}, since time.Time) bool {
-	removedAt, removed := s.removals.addedAt(value)
+func (s ElementSet) isRemoved(value interface{}, since time.Time) (bool, error) {
+	removedAt, removed, err := s.removals.addedAt(value)
+	if err != nil {
+		return false, err
+	}
 	if !removed {
-		return false
+		return false, nil
 	}
 	if since.Before(removedAt) {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
 // Get returns set content
-func (s ElementSet) Get() []interface{} {
+// Please note that this function pvovides liveness guarantees only
+func (s ElementSet) Get() ([]interface{}, error) {
 	var result []interface{}
-	s.additions.each(func(element interface{}, addedAt time.Time) {
-		if !s.isRemoved(element, addedAt) {
+
+	err := s.additions.each(func(element interface{}, addedAt time.Time) error {
+		removed, removedErr := s.isRemoved(element, addedAt)
+		if removedErr != nil {
+			return removedErr
+		}
+		if !removed {
 			result = append(result, element)
 		}
+		return nil
 	})
-	return result
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

@@ -63,17 +63,21 @@ func floatToTime(score float64) time.Time {
 
 // add runs a Redis script. Redis scripts are transactional by definition
 // and by extension atomic.
-func (s redisTimedSet) add(value interface{}, t time.Time) {
-	s.addScript.Run(s.client, []string{s.key}, timeToFloat(t), s.marshal(value)).Result()
+func (s redisTimedSet) add(value interface{}, t time.Time) error {
+	_, err := s.addScript.Run(s.client, []string{s.key}, timeToFloat(t), s.marshal(value)).Result()
+	return err
 }
 
 // addedAt returns the timestamp of a given element if it exists.
-func (s redisTimedSet) addedAt(value interface{}) (time.Time, bool) {
+func (s redisTimedSet) addedAt(value interface{}) (time.Time, bool, error) {
 	score, err := s.client.ZScore(s.key, s.marshal(value)).Result()
 	if err != nil {
-		return time.Time{}, false
+		if err.Error() == "redis: nil" {
+			return time.Time{}, false, nil
+		}
+		return time.Time{}, false, err
 	}
-	return floatToTime(score), true
+	return floatToTime(score), true, err
 }
 
 // setMarshal allows to specify a specific marshalling function
@@ -88,7 +92,7 @@ func (s *redisTimedSet) setUnmarshal(f func(value string) interface{}) {
 
 // each traverses the items in the TimedSet, calling the provided function
 // for each element/timestamp association.
-func (s redisTimedSet) each(f func(element interface{}, addedAt time.Time)) error {
+func (s redisTimedSet) each(f func(element interface{}, addedAt time.Time) error) error {
 	r, err := s.client.ZRangeWithScores(s.key, 0, -1).Result()
 	if err != nil {
 		return err

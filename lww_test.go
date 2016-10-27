@@ -24,17 +24,31 @@ func testingSets(t *testing.T) []*ElementSet {
 
 func TestLWWNew(t *testing.T) {
 	for _, set := range testingSets(t) {
-		assert.Equal(t, 0, len(set.Get()))
+		elements, err := set.Get()
+		assert.Nil(t, err)
+		assert.Equal(t, 0, len(elements))
 	}
 }
 
 func TestLWWAddRemoveAndExists(t *testing.T) {
 	for _, set := range testingSets(t) {
-		assert.Equal(t, false, set.Exists("Hello"))
-		set.Add("Hello", time.Now())
-		assert.Equal(t, true, set.Exists("Hello"))
-		set.Remove("Hello", time.Now())
-		assert.Equal(t, false, set.Exists("Hello"))
+		exists1, exists1Err := set.Exists("Hello")
+		assert.Nil(t, exists1Err)
+		assert.Equal(t, false, exists1)
+
+		addErr := set.Add("Hello", time.Now())
+		assert.Nil(t, addErr)
+
+		exists2, exists2Err := set.Exists("Hello")
+		assert.Nil(t, exists2Err)
+		assert.Equal(t, true, exists2)
+
+		removeErr := set.Remove("Hello", time.Now())
+		assert.Nil(t, removeErr)
+
+		exists3, exists3Err := set.Exists("Hello")
+		assert.Nil(t, exists3Err)
+		assert.Equal(t, false, exists3)
 	}
 }
 
@@ -45,7 +59,8 @@ func TestLWWAddRemoveAndGet(t *testing.T) {
 		set.Add("Toronto", time.Now())
 		set.Add("Paris", time.Now())
 		set.Remove("Montreal", time.Now())
-		result := set.Get()
+		result, err := set.Get()
+		assert.Nil(t, err)
 		assert.Equal(t, 3, len(result))
 		assert.Contains(t, result, "NYC")
 		assert.Contains(t, result, "Toronto")

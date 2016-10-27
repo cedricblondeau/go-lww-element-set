@@ -26,6 +26,11 @@ sharding, garbage collection or REST-ish HTTP interface.
 ## Public API
 
 This package (`lww`) exposes 3 different constructors. Each constructor returns an `ElementSet`.
+Public methods return an error if something like a network failure error happens.
+`Add()` and `Remove()` methods do not guarantee that the operation took effect, 
+just that it was acknowledged if no error.
+`Exists()` and `Get()` methods provides liveness guarantees only.
+
 See [GoDoc reference](https://godoc.org/github.com/cedricblondeau/go-lww-element-set) for details.
 
 ## Usage
@@ -35,6 +40,7 @@ See [GoDoc reference](https://godoc.org/github.com/cedricblondeau/go-lww-element
 ```go
 import (
 	"time"
+
 	"github.com/cedricblondeau/go-lww-element-set"
 )
 
@@ -61,10 +67,10 @@ rc := redis.NewClient(&redis.Options{
 	DB:       0,  // use default DB
 })
 rs := lww.NewRedisElementSet("shopping_cart", rc)
-rs.Add("Product #1", time.Now())
-rs.Add("Product #2", time.Now())
-rs.Remove("Product #1", time.Now())
-rs.Get() // ["Product #2"]
+addErr1 := s.Add("Product #1", time.Now()) // Check addErr1 for eventual redis error
+addErr2 := rs.Add("Product #2", time.Now()) // Check addErr2 for eventual redis error
+rmErr := rs.Remove("Product #1", time.Now()) // Check rmErr for eventual redis error
+err := rs.Get() // ["Product #2"] // Check err for eventual redis error
 ```
 
 You can also use `NewRedisElementSetWithCustomMarshalling()` construtor 
