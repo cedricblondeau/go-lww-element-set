@@ -8,17 +8,21 @@
 
 A conflict-free replicated data type (CRDT) is a type of data structure that is 
 used to achieve **strong eventual consistency** and monotonicity (ie, there are no rollbacks) 
-across a set of nodes in a distributed system.
+across a set of nodes in a **distributed system**.
 
-This package focuses on Last-Writer-Wins (LWW) Element Set 
-data structure that uses timestamped adds and removes.
+## Package
+
+This package focuses on Last-Writer-Wins (LWW) Element Set data structure 
+that uses timestamped adds and removes.
+It provides 2 implementations (Go maps and Redis).
+
+Unlike [Roshi](https://github.com/soundcloud/roshi), this package **does not** provide replication,
+sharding, garbage collection or REST-ish HTTP interface.
 
 ## Public API
 
-This package (`lww`) exposes 3 different constructors.
-Each constructor returns an `ElementSet`.
-
-See [package GoDoc](https://godoc.org/github.com/cedricblondeau/go-lww-element-set) for details.
+This package (`lww`) exposes 3 different constructors. Each constructor returns an `ElementSet`.
+See [GoDoc reference](https://godoc.org/github.com/cedricblondeau/go-lww-element-set) for details.
 
 ## Usage
 
@@ -79,7 +83,6 @@ This package provides two implementations of this interface:
 Go maps implementation uses two [mapTimedSet](timed_set_map.go).
 A [mapTimedSet](timed_set_map.go) is a [timedSet](timed_set.go) backed 
 with a [Go map](https://blog.golang.org/go-maps-in-action).
-
 Because Go maps are [not safe for concurrent use](https://golang.org/doc/faq#atomic_maps), 
 mutual exclusion is used.
 
@@ -88,7 +91,6 @@ mutual exclusion is used.
 Redis implementation uses two [redisTimedSet](timed_set_redis.go).
 A [redisTimedSet](timed_set_redis.go) is a [timedSet](timed_set.go) backed 
 with a [Redis sorted set](http://redis.io/topics/data-types#sorted-sets).
-
 This implementation uses a Redis script ([which is transactional by definition and by extension atomic](http://redis.io/topics/transactions#redis-scripting-and-transactions)) 
 to add elements.
 
@@ -102,6 +104,7 @@ go test -race
 
 ## References
 
+- [A comprehensive study of Convergent and Commutative Replicated Data Types by Marc Shapiro](https://hal.inria.fr/file/index/docid/555588/filename/techreport.pdf)
 - [Summary of CRDTs by Vaughn Vernon](https://vaughnvernon.co/?p=1012)
 - [Roshi: a CRDT system for timestamped events by Peter Bourgon](https://developers.soundcloud.com/blog/roshi-a-crdt-system-for-timestamped-events)
 - [Consistency without consensus in production systems by Peter Bourgon](https://www.youtube.com/watch?list=UU_QIfHvN9auy2CoOdSfMWDw&v=em9zLzM8O7c)
