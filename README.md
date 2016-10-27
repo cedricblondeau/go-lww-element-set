@@ -91,8 +91,14 @@ mutual exclusion is used.
 Redis implementation uses two [redisTimedSet](timed_set_redis.go).
 A [redisTimedSet](timed_set_redis.go) is a [timedSet](timed_set.go) backed 
 with a [Redis sorted set](http://redis.io/topics/data-types#sorted-sets).
-This implementation uses a Redis script ([which is transactional by definition and by extension atomic](http://redis.io/topics/transactions#redis-scripting-and-transactions)) 
-to add elements.
+This implementation uses [go-redis](https://github.com/go-redis/redis) client.
+
+To make the add() action atomic, a Redis script 
+([which is transactional by definition and by extension atomic](http://redis.io/topics/transactions#redis-scripting-and-transactions)) is used.
+
+Redis uses IEEE 754 64-bit numbers to rank elements in a sorted set (score).
+As a result, the given timestamps will be converted to float64 and it will 
+limit the precision to one millisecond.
 
 ## Run tests
 
