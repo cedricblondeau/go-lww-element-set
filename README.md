@@ -1,9 +1,7 @@
-# Last-Writer-Wins (LWW) Element Set
+# Last-Writer-Wins (LWW) Element Set [![GoDoc](https://godoc.org/github.com/cedricblondeau/go-lww-element-set?status.svg)](https://godoc.org/github.com/cedricblondeau/go-lww-element-set) [![Build Status](https://api.travis-ci.org/cedricblondeau/go-lww-element-set.svg?branch=develop)](https://travis-ci.org/cedricblondeau/go-lww-element-set)
 
 > A LWW CRDT implementation with Redis support in Go.
 
-[![GoDoc](https://godoc.org/github.com/cedricblondeau/go-lww-element-set?status.svg)](https://godoc.org/github.com/cedricblondeau/go-lww-element-set)
-[![Build Status](https://api.travis-ci.org/cedricblondeau/go-lww-element-set.svg?branch=develop)](https://travis-ci.org/cedricblondeau/go-lww-element-set)
 [![forthebadge](http://forthebadge.com/images/badges/as-seen-on-tv.svg)](http://forthebadge.com)
 
 ## A CR-What?!
