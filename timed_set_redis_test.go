@@ -21,10 +21,10 @@ func testingRedisClient(t *testing.T) *redis.Client {
 	return c
 }
 
-func testingRedisTimedSet(t *testing.T) *RedisTimedSet {
+func testingRedisTimedSet(t *testing.T) *redisTimedSet {
 	c := testingRedisClient(t)
 	c.Del(redisTestingKey)
-	return NewRedisTimedSet(redisTestingKey, c)
+	return newRedisTimedSet(redisTestingKey, c)
 }
 
 func TestTimeToFloat(t *testing.T) {
@@ -42,7 +42,7 @@ func TestFloatToTime(t *testing.T) {
 
 func TestTimedSetRedisAdd(t *testing.T) {
 	s := testingRedisTimedSet(t)
-	s.Add("Raptors", time.Now())
+	s.add("Raptors", time.Now())
 	res := s.client.ZCard(redisTestingKey)
 	assert.Equal(t, int64(1), res.Val())
 }
@@ -50,8 +50,8 @@ func TestTimedSetRedisAdd(t *testing.T) {
 func TestTimedSetRedisAddedAt(t *testing.T) {
 	s := testingRedisTimedSet(t)
 	now := time.Now()
-	s.Add("Giants", now)
-	addedAt, ok := s.AddedAt("Giants")
+	s.add("Giants", now)
+	addedAt, ok := s.addedAt("Giants")
 	assert.Equal(t, true, ok)
 	expected := floatToTime(timeToFloat(now))
 	assert.Equal(t, expected, addedAt)
@@ -59,12 +59,12 @@ func TestTimedSetRedisAddedAt(t *testing.T) {
 
 func TestTimedSetRedisEach(t *testing.T) {
 	s := testingRedisTimedSet(t)
-	s.Add("Koala", time.Now())
-	s.Add("Cat", time.Now())
-	s.Add("Dog", time.Now())
+	s.add("Koala", time.Now())
+	s.add("Cat", time.Now())
+	s.add("Dog", time.Now())
 
 	result := []string{}
-	err := s.Each(func(element interface{}, addedAt time.Time) {
+	err := s.each(func(element interface{}, addedAt time.Time) {
 		result = append(result, element.(string))
 	})
 	assert.Equal(t, nil, err)
@@ -76,12 +76,12 @@ func TestTimedSetMapRedisSameElementWithGreaterTimestamp(t *testing.T) {
 	oct25, _ := time.Parse(shortDateForm, "2016-Oct-25")
 
 	s := testingRedisTimedSet(t)
-	s.Add("Hi!", oct24)
-	addedAt, _ := s.AddedAt("Hi!")
+	s.add("Hi!", oct24)
+	addedAt, _ := s.addedAt("Hi!")
 	assert.Equal(t, floatToTime(timeToFloat(oct24)), addedAt)
 
-	s.Add("Hi!", oct25)
-	addedAt, _ = s.AddedAt("Hi!")
+	s.add("Hi!", oct25)
+	addedAt, _ = s.addedAt("Hi!")
 	assert.Equal(t, floatToTime(timeToFloat(oct25)), addedAt)
 }
 
@@ -90,11 +90,11 @@ func TestTimedSetMapRedisSameElementWithLesserTimestamp(t *testing.T) {
 	oct24, _ := time.Parse(shortDateForm, "2016-Oct-24")
 
 	s := testingRedisTimedSet(t)
-	s.Add("Hi!", oct24)
-	addedAt, _ := s.AddedAt("Hi!")
+	s.add("Hi!", oct24)
+	addedAt, _ := s.addedAt("Hi!")
 	assert.Equal(t, floatToTime(timeToFloat(oct24)), addedAt)
 
-	s.Add("Hi!", oct23)
-	addedAt, _ = s.AddedAt("Hi!")
+	s.add("Hi!", oct23)
+	addedAt, _ = s.addedAt("Hi!")
 	assert.Equal(t, floatToTime(timeToFloat(oct24)), addedAt)
 }

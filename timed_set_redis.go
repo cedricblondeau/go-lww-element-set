@@ -22,8 +22,8 @@ else
 end
 `
 
-// RedisTimedSet is a TimedSet implementation that uses Redis.
-type RedisTimedSet struct {
+// redisTimedSet is a TimedSet implementation that uses Redis.
+type redisTimedSet struct {
 	client    *redis.Client
 	addScript *redis.Script
 	key       string
@@ -31,9 +31,9 @@ type RedisTimedSet struct {
 	unmarshal func(string) interface{}
 }
 
-// NewRedisTimedSet returns an empty and ready-to-use Redis-backed TimedSet data structure.
-func NewRedisTimedSet(key string, client *redis.Client) *RedisTimedSet {
-	s := &RedisTimedSet{
+// newRedisTimedSet returns an empty and ready-to-use Redis-backed timedSet data structure.
+func newRedisTimedSet(key string, client *redis.Client) *redisTimedSet {
+	s := &redisTimedSet{
 		client:    client,
 		addScript: redis.NewScript(redisAddScript),
 		key:       key,
@@ -61,14 +61,14 @@ func floatToTime(score float64) time.Time {
 	return time.Unix(0, 0).Add(time.Duration(score) * time.Microsecond)
 }
 
-// Add runs a Redis script. Redis scripts are transactional by definition
+// add runs a Redis script. Redis scripts are transactional by definition
 // and by extension atomic.
-func (s RedisTimedSet) Add(value interface{}, t time.Time) {
+func (s redisTimedSet) add(value interface{}, t time.Time) {
 	s.addScript.Run(s.client, []string{s.key}, timeToFloat(t), s.marshal(value)).Result()
 }
 
-// AddedAt returns the timestamp of a given element if it exists.
-func (s RedisTimedSet) AddedAt(value interface{}) (time.Time, bool) {
+// addedAt returns the timestamp of a given element if it exists.
+func (s redisTimedSet) addedAt(value interface{}) (time.Time, bool) {
 	score, err := s.client.ZScore(s.key, s.marshal(value)).Result()
 	if err != nil {
 		return time.Time{}, false
@@ -76,19 +76,19 @@ func (s RedisTimedSet) AddedAt(value interface{}) (time.Time, bool) {
 	return floatToTime(score), true
 }
 
-// SetMarshal allows to specify a specific marshalling function
-func (s *RedisTimedSet) SetMarshal(f func(interface{}) string) {
+// setMarshal allows to specify a specific marshalling function
+func (s *redisTimedSet) setMarshal(f func(interface{}) string) {
 	s.marshal = f
 }
 
-// SetUnmarshal allows to specify a specific unmarshalling function
-func (s *RedisTimedSet) SetUnmarshal(f func(value string) interface{}) {
+// setUnmarshal allows to specify a specific unmarshalling function
+func (s *redisTimedSet) setUnmarshal(f func(value string) interface{}) {
 	s.unmarshal = f
 }
 
-// Each traverses the items in the TimedSet, calling the provided function
+// each traverses the items in the TimedSet, calling the provided function
 // for each element/timestamp association.
-func (s RedisTimedSet) Each(f func(element interface{}, addedAt time.Time)) error {
+func (s redisTimedSet) each(f func(element interface{}, addedAt time.Time)) error {
 	r, err := s.client.ZRangeWithScores(s.key, 0, -1).Result()
 	if err != nil {
 		return err
