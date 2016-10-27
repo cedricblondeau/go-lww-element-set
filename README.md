@@ -10,6 +10,10 @@ A conflict-free replicated data type (CRDT) is a type of data structure that is
 used to achieve **strong eventual consistency** and monotonicity (ie, there are no rollbacks) 
 across a set of nodes in a **distributed system**.
 
+It can be particularly interesting in available/partition-tolerant (AP) settings because of 
+the [eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency) it brings, 
+if you're okay with [liveness guarantees](https://en.wikipedia.org/wiki/Liveness).
+
 ## Package
 
 This package focuses on Last-Writer-Wins (LWW) Element Set data structure 
