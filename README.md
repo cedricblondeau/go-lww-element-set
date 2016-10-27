@@ -1,36 +1,30 @@
 # Last-Writer-Wins (LWW) Element Set
 
-> A LWW CRDT implementation in Go.
+> A LWW CRDT implementation with Redis support in Go.
 
-## CR-What?!
+[![GoDoc](https://godoc.org/github.com/cedricblondeau/go-lww-element-set?status.svg)](https://godoc.org/github.com/cedricblondeau/go-lww-element-set)
+[![Build Status](https://api.travis-ci.org/cedricblondeau/go-lww-element-set.svg?branch=develop)](https://travis-ci.org/cedricblondeau/go-lww-element-set)
+[![forthebadge](http://forthebadge.com/images/badges/as-seen-on-tv.svg)](http://forthebadge.com)
+
+## A CR-What?!
 
 A conflict-free replicated data type (CRDT) is a type of data structure that is 
-used to achieve strong eventual consistency and monotonicity (ie, there are no rollbacks) 
+used to achieve **strong eventual consistency** and monotonicity (ie, there are no rollbacks) 
 across a set of nodes in a distributed system.
 
 This package focuses on Last-Writer-Wins (LWW) Element Set 
 data structure that uses timestamped adds and removes.
 
-## Implementations
+## Public API
 
-[ElementSet](lww.go) defines the LWW Element Set logic.
-An [ElementSet](lww.go) is backed by two underlying 
-timestamped sets ([TimedSet](timed_set.go)).
+This package (`lww`) exposes 3 different constructors.
+Each constructor returns an `ElementSet`.
 
-[TimedSet](timed_set.go) is an interface that defines 
-a set where added element are associated with timestamps.
-This package provides two implementations of this interface:
-- MapTimedSet (using Go maps)
-- RedisTimedSet (using Redis)
+See [package GoDoc](https://godoc.org/github.com/cedricblondeau/go-lww-element-set) for details.
 
-#### Map-backed implementation
+## Usage
 
-`NewMapElementSet()` returns a LWW backed with two [MapTimedSet](timed_set_map.go).
-
-A [MapTimedSet](timed_set_map.go) is a [TimedSet](timed_set.go) backed 
-with a [Go map](https://blog.golang.org/go-maps-in-action).
-Because Go maps are [not safe for concurrent use](https://golang.org/doc/faq#atomic_maps), 
-mutual exclusion is used.
+#### Go maps backed LWW element set
 
 ```go
 import (
@@ -45,14 +39,7 @@ ms.Remove("Hello", time.Now())
 ms.Get() // ["Hi!"]
 ```
 
-#### Redis-backed implementation
-
-`NewRedisElementSet()` returns a LWW backed with two [RedisTimedSet](timed_set_redis.go).
-
-A [RedisTimedSet](timed_set_redis.go) is a [TimedSet](timed_set.go) backed 
-with a [Redis sorted set](http://redis.io/topics/data-types#sorted-sets).
-This implementation uses a Redis script ([which is transactional by definition and by extension atomic](http://redis.io/topics/transactions#redis-scripting-and-transactions)) 
-to add elements.
+#### Redis backed LWW element set
 
 ```go
 import (
@@ -74,6 +61,39 @@ rs.Remove("Product #1", time.Now())
 rs.Get() // ["Product #2"]
 ```
 
+You can also use `NewRedisElementSetWithCustomMarshalling()` construtor 
+to specify custom marshalling/unmarshalling functions.
+
+## Implementation details
+
+[ElementSet](lww.go) defines the LWW Element Set logic.
+An [ElementSet](lww.go) is backed by two underlying 
+timestamped sets ([timedSet](timed_set.go)).
+
+[timedSet](timed_set.go) is an interface that defines 
+a set where added element are associated with timestamps.
+This package provides two implementations of this interface:
+- mapTimedSet (using Go maps)
+- redisTimedSet (using Redis)
+
+#### Go maps implementation
+
+Go maps implementation uses two [mapTimedSet](timed_set_map.go).
+A [mapTimedSet](timed_set_map.go) is a [timedSet](timed_set.go) backed 
+with a [Go map](https://blog.golang.org/go-maps-in-action).
+
+Because Go maps are [not safe for concurrent use](https://golang.org/doc/faq#atomic_maps), 
+mutual exclusion is used.
+
+#### Redis implementation
+
+Redis implementation uses two [redisTimedSet](timed_set_redis.go).
+A [redisTimedSet](timed_set_redis.go) is a [timedSet](timed_set.go) backed 
+with a [Redis sorted set](http://redis.io/topics/data-types#sorted-sets).
+
+This implementation uses a Redis script ([which is transactional by definition and by extension atomic](http://redis.io/topics/transactions#redis-scripting-and-transactions)) 
+to add elements.
+
 ## Run tests
 
 To run tests with race detector enabled:
@@ -84,7 +104,7 @@ go test -race
 
 ## References
 
-- https://vaughnvernon.co/?p=1012
-- https://developers.soundcloud.com/blog/roshi-a-crdt-system-for-timestamped-events
-- https://www.youtube.com/watch?list=UU_QIfHvN9auy2CoOdSfMWDw&v=em9zLzM8O7c
-- http://blog.plasmaconduit.com/crdts-distributed-semilattices/
+- [Summary of CRDTs by Vaughn Vernon](https://vaughnvernon.co/?p=1012)
+- [Roshi: a CRDT system for timestamped events by Peter Bourgon](https://developers.soundcloud.com/blog/roshi-a-crdt-system-for-timestamped-events)
+- [Consistency without consensus in production systems by Peter Bourgon](https://www.youtube.com/watch?list=UU_QIfHvN9auy2CoOdSfMWDw&v=em9zLzM8O7c)
+- [CRDT notes by Paul Frazee](https://github.com/pfrazee/crdt_notes)
