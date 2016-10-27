@@ -1,0 +1,16 @@
+language: go
+
+go:
+  - 1.7
+  - tip
+
+sudo: false
+
+services:
+  - redis-server
+
+script:
+    - go test -v --race .
+
+notifications:
+  email: false
