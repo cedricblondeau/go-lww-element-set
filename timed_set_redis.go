@@ -98,7 +98,10 @@ func (s redisTimedSet) each(f func(element interface{}, addedAt time.Time) error
 		return err
 	}
 	for _, v := range r {
-		f(v.Member, floatToTime(v.Score))
+		fErr := f(v.Member, floatToTime(v.Score))
+		if fErr != nil {
+			return fErr
+		}
 	}
 	return nil
 }
