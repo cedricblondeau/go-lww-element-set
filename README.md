@@ -48,7 +48,8 @@ ms := lww.NewMapElementSet()
 ms.Add("Hello", time.Now())
 ms.Add("Hi!", time.Now())
 ms.Remove("Hello", time.Now())
-ms.Get() // ["Hi!"]
+elements, err := ms.Get() 
+elements // ["Hi!"]
 ```
 
 #### Redis backed LWW element set
@@ -70,7 +71,8 @@ rs := lww.NewRedisElementSet("shopping_cart", rc)
 addErr1 := s.Add("Product #1", time.Now()) // Check addErr1 for eventual redis error
 addErr2 := rs.Add("Product #2", time.Now()) // Check addErr2 for eventual redis error
 rmErr := rs.Remove("Product #1", time.Now()) // Check rmErr for eventual redis error
-err := rs.Get() // ["Product #2"] // Check err for eventual redis error
+elements, err := rs.Get() // Check err for eventual redis error
+elements //  ["Product #2"]
 ```
 
 You can also use `NewRedisElementSetWithCustomMarshalling()` construtor 
