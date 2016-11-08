@@ -11,8 +11,7 @@ used to achieve **strong eventual consistency** and monotonicity (ie, there are 
 across a set of nodes in a **distributed system**.
 
 It can be particularly interesting in available/partition-tolerant (AP) settings because of 
-the [eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency) it brings, 
-if you're okay with [liveness guarantees](https://en.wikipedia.org/wiki/Liveness).
+the [strong eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency#Strong_eventual_consistency) it brings.
 
 ## Package
 
